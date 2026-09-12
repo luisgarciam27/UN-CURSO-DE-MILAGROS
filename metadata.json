@@ -1,0 +1,6 @@
+{
+  "name": "Lector Un Curso de Milagros",
+  "description": "Lector interactivo tipo libro digital para Un Curso de Milagros con navegación página por página, índice, buscador, marcadores y modo noche.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

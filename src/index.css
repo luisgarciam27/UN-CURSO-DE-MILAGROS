@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+  .font-literata {
+    font-family: 'Literata', Georgia, 'Times New Roman', serif;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-atkinson {
+    font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 0.012em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-merriweather {
+    font-family: 'Merriweather', Georgia, serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-lora {
+    font-family: 'Lora', Georgia, serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-newsreader {
+    font-family: 'Newsreader', Georgia, serif;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-cormorant {
+    font-family: 'Literata', 'Cormorant Garamond', Georgia, serif;
+  }
+  .font-serif-book {
+    font-family: 'Literata', Georgia, serif;
+  }
+  .font-display {
+    font-family: 'Cinzel', serif;
+  }
+  .font-sans-ui {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .pdf-night-filter {
+    filter: invert(0.92) hue-rotate(180deg) contrast(0.92) brightness(0.96);
+  }
+  .safe-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+  .safe-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  .safe-left {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+  }
+  .safe-right {
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 140, 140, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.45);
+}
+
+/* Animation for page turning / transition */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-turn {
+  animation: fadeInSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
