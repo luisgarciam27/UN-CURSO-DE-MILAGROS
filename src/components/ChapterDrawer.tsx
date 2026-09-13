@@ -41,6 +41,7 @@ interface ChapterDrawerProps {
   onClearAllPersonalNotes: () => void;
   onToggleDocked: () => void;
   onOpenSearch: () => void;
+  onOpenOraciones?: () => void;
   onGoHome?: () => void;
 }
 
@@ -61,6 +62,7 @@ export const ChapterDrawer: React.FC<ChapterDrawerProps> = ({
   onClearAllPersonalNotes,
   onToggleDocked,
   onOpenSearch,
+  onOpenOraciones,
   onGoHome,
 }) => {
   const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'quotes' | 'notes'>('chapters');
@@ -335,6 +337,29 @@ export const ChapterDrawer: React.FC<ChapterDrawerProps> = ({
               ))}
             </div>
           )}
+
+          {/* Oraciones del Perdón Banner Button */}
+          {onOpenOraciones && (
+            <button
+              onClick={onOpenOraciones}
+              className="mt-2.5 w-full p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 flex items-center justify-between text-left transition-all cursor-pointer group shadow-xs"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <div className="text-xs font-serif-book font-bold text-amber-800 dark:text-amber-200">
+                    Oraciones del Perdón (UCDM)
+                  </div>
+                  <div className="text-[10px] text-neutral-500 dark:text-neutral-400 font-sans-ui">
+                    25+ oraciones interactivas para cada situación
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform" />
+            </button>
+          )}
         </div>
 
         {/* Dynamic Display: If user is searching -> show live results. Else show tabs */}
@@ -485,54 +510,113 @@ export const ChapterDrawer: React.FC<ChapterDrawerProps> = ({
         ) : (
           /* Standard View with 3 Tabs: Capítulos | Marcadores | Mis Citas */
           <>
-            <div className="flex border-b border-[#e5dfd2] dark:border-[#272d38] bg-[#f8f5ee] dark:bg-[#171a21] text-xs font-sans-ui font-medium">
-              <button
-                id="tab-chapters-btn"
-                onClick={() => setActiveTab('chapters')}
-                className={`flex-1 py-2.5 text-center border-b-2 transition-all cursor-pointer ${
-                  activeTab === 'chapters'
-                    ? 'border-[#8c6b2d] dark:border-[#d4af37] text-[#8c6b2d] dark:text-[#d4af37] bg-white/70 dark:bg-[#1a1e26] font-semibold'
-                    : 'border-transparent text-neutral-500 hover:text-current'
-                }`}
+            {/* Segmented Pill Tab Bar (Kindle & Apple Books aesthetic - Sin contorno azul de foco) */}
+            <div className="p-2.5 border-b border-[#e5dfd2] dark:border-[#272d38] bg-[#f8f5ee]/95 dark:bg-[#171a21]/95 backdrop-blur-md">
+              <div
+                role="tablist"
+                aria-label="Secciones del panel de estudio"
+                className="grid grid-cols-4 p-1 rounded-2xl bg-[#ebe5d8] dark:bg-[#12151b] border border-[#ded5c5] dark:border-[#252b36] gap-1 text-[11px] font-sans-ui select-none shadow-inner"
               >
-                Capítulos (31)
-              </button>
-              <button
-                id="tab-bookmarks-btn"
-                onClick={() => setActiveTab('bookmarks')}
-                className={`flex-1 py-2.5 text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1 ${
-                  activeTab === 'bookmarks'
-                    ? 'border-[#8c6b2d] dark:border-[#d4af37] text-[#8c6b2d] dark:text-[#d4af37] bg-white/70 dark:bg-[#1a1e26] font-semibold'
-                    : 'border-transparent text-neutral-500 hover:text-current'
-                }`}
-              >
-                <Bookmark className="w-3.5 h-3.5" />
-                <span>Marcadores ({bookmarks.length})</span>
-              </button>
-              <button
-                id="tab-quotes-btn"
-                onClick={() => setActiveTab('quotes')}
-                className={`flex-1 py-2.5 text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1 ${
-                  activeTab === 'quotes'
-                    ? 'border-[#8c6b2d] dark:border-[#d4af37] text-[#8c6b2d] dark:text-[#d4af37] bg-white/70 dark:bg-[#1a1e26] font-semibold'
-                    : 'border-transparent text-neutral-500 hover:text-current'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Citas ({savedQuotes.length})</span>
-              </button>
-              <button
-                id="tab-notes-btn"
-                onClick={() => setActiveTab('notes')}
-                className={`flex-1 py-2.5 text-center border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1 ${
-                  activeTab === 'notes'
-                    ? 'border-[#8c6b2d] dark:border-[#d4af37] text-[#8c6b2d] dark:text-[#d4af37] bg-white/70 dark:bg-[#1a1e26] font-semibold'
-                    : 'border-transparent text-neutral-500 hover:text-current'
-                }`}
-              >
-                <StickyNote className="w-3.5 h-3.5" />
-                <span>Notas ({personalNotes.length})</span>
-              </button>
+                <button
+                  id="tab-chapters-btn"
+                  role="tab"
+                  aria-selected={activeTab === 'chapters'}
+                  onClick={() => setActiveTab('chapters')}
+                  className={`py-2 px-1 rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1 outline-none focus:outline-none focus-visible:outline-none active:outline-none ${
+                    activeTab === 'chapters'
+                      ? 'bg-white dark:bg-[#202530] text-[#8c6b2d] dark:text-[#d4af37] shadow-sm font-semibold border border-black/5 dark:border-white/10'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-white/40 dark:hover:bg-white/5 font-medium'
+                  }`}
+                  title="Índice canónico de 31 capítulos"
+                >
+                  <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">Capítulos</span>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
+                      activeTab === 'chapters'
+                        ? 'bg-[#8c6b2d]/15 text-[#8c6b2d] dark:text-[#d4af37]'
+                        : 'bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400'
+                    }`}
+                  >
+                    31
+                  </span>
+                </button>
+
+                <button
+                  id="tab-bookmarks-btn"
+                  role="tab"
+                  aria-selected={activeTab === 'bookmarks'}
+                  onClick={() => setActiveTab('bookmarks')}
+                  className={`py-2 px-1 rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1 outline-none focus:outline-none focus-visible:outline-none active:outline-none ${
+                    activeTab === 'bookmarks'
+                      ? 'bg-white dark:bg-[#202530] text-[#8c6b2d] dark:text-[#d4af37] shadow-sm font-semibold border border-black/5 dark:border-white/10'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-white/40 dark:hover:bg-white/5 font-medium'
+                  }`}
+                  title="Tus páginas marcadas"
+                >
+                  <Bookmark className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">Marcas</span>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
+                      activeTab === 'bookmarks'
+                        ? 'bg-[#8c6b2d]/15 text-[#8c6b2d] dark:text-[#d4af37]'
+                        : 'bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400'
+                    }`}
+                  >
+                    {bookmarks.length}
+                  </span>
+                </button>
+
+                <button
+                  id="tab-quotes-btn"
+                  role="tab"
+                  aria-selected={activeTab === 'quotes'}
+                  onClick={() => setActiveTab('quotes')}
+                  className={`py-2 px-1 rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1 outline-none focus:outline-none focus-visible:outline-none active:outline-none ${
+                    activeTab === 'quotes'
+                      ? 'bg-white dark:bg-[#202530] text-[#8c6b2d] dark:text-[#d4af37] shadow-sm font-semibold border border-black/5 dark:border-white/10'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-white/40 dark:hover:bg-white/5 font-medium'
+                  }`}
+                  title="Pasajes y citas subrayadas"
+                >
+                  <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">Citas</span>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
+                      activeTab === 'quotes'
+                        ? 'bg-[#8c6b2d]/15 text-[#8c6b2d] dark:text-[#d4af37]'
+                        : 'bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400'
+                    }`}
+                  >
+                    {savedQuotes.length}
+                  </span>
+                </button>
+
+                <button
+                  id="tab-notes-btn"
+                  role="tab"
+                  aria-selected={activeTab === 'notes'}
+                  onClick={() => setActiveTab('notes')}
+                  className={`py-2 px-1 rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1 outline-none focus:outline-none focus-visible:outline-none active:outline-none ${
+                    activeTab === 'notes'
+                      ? 'bg-white dark:bg-[#202530] text-[#8c6b2d] dark:text-[#d4af37] shadow-sm font-semibold border border-black/5 dark:border-white/10'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-white/40 dark:hover:bg-white/5 font-medium'
+                  }`}
+                  title="Tus reflexiones y notas personales"
+                >
+                  <StickyNote className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">Notas</span>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
+                      activeTab === 'notes'
+                        ? 'bg-[#8c6b2d]/15 text-[#8c6b2d] dark:text-[#d4af37]'
+                        : 'bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400'
+                    }`}
+                  >
+                    {personalNotes.length}
+                  </span>
+                </button>
+              </div>
             </div>
 
             {/* Scrollable Content */}
@@ -883,44 +967,70 @@ export const ChapterDrawer: React.FC<ChapterDrawerProps> = ({
                         </button>
                       </div>
 
-                      {savedQuotes.map((q) => (
-                        <div
-                          key={q.id}
-                          className="px-4 py-3 border-l-2 border-[#8c6b2d] bg-[#f8f4ec] dark:bg-[#1a1e27] m-2 rounded-r-xl shadow-xs"
-                        >
-                          <p className="font-serif-book italic text-xs sm:text-sm text-[#2c2925] dark:text-[#dfdbd1] leading-relaxed">
-                            «{q.text}»
-                          </p>
-                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-black/5 dark:border-white/5">
-                            <button
-                              onClick={() => handleSelectPageAndClose(q.page)}
-                              className="text-[11px] text-[#8c6b2d] dark:text-[#d4af37] font-sans-ui hover:underline cursor-pointer"
-                            >
-                              Cap. {q.chapterNumber} • Pág. {q.page}
-                            </button>
-                            <div className="flex items-center gap-1">
+                      {savedQuotes.map((q) => {
+                        const borderColor =
+                          q.color === 'emerald'
+                            ? 'border-emerald-500'
+                            : q.color === 'sky'
+                            ? 'border-sky-500'
+                            : q.color === 'rose'
+                            ? 'border-rose-500'
+                            : 'border-amber-500';
+                        const dotColor =
+                          q.color === 'emerald'
+                            ? 'bg-emerald-400'
+                            : q.color === 'sky'
+                            ? 'bg-sky-400'
+                            : q.color === 'rose'
+                            ? 'bg-pink-400'
+                            : 'bg-amber-400';
+
+                        return (
+                          <div
+                            key={q.id}
+                            className={`px-4 py-3 border-l-3 ${borderColor} bg-[#f8f4ec] dark:bg-[#1a1e27] m-2 rounded-r-xl shadow-xs transition-colors`}
+                          >
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <span className={`w-2 h-2 rounded-full ${dotColor} inline-block`} />
+                              <span className="text-[10px] uppercase tracking-wider font-sans-ui font-semibold text-neutral-500">
+                                Subrayado • Cap. {q.chapterNumber}
+                              </span>
+                            </div>
+                            <p className="font-serif-book italic text-xs sm:text-sm text-[#2c2925] dark:text-[#dfdbd1] leading-relaxed">
+                              «{q.text}»
+                            </p>
+                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-black/5 dark:border-white/5">
                               <button
-                                onClick={() => handleCopyQuote(q)}
-                                className="p-1 rounded-md text-neutral-400 hover:text-current hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
-                                title="Copiar texto"
+                                onClick={() => handleSelectPageAndClose(q.page)}
+                                className="text-[11px] text-[#8c6b2d] dark:text-[#d4af37] font-sans-ui font-semibold hover:underline cursor-pointer flex items-center gap-1"
                               >
-                                {copiedQuoteId === q.id ? (
-                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                ) : (
-                                  <Copy className="w-3.5 h-3.5" />
-                                )}
+                                <span>Ir a la Pág. {q.page}</span>
+                                <ArrowRight className="w-3 h-3" />
                               </button>
-                              <button
-                                onClick={() => onDeleteQuote(q.id)}
-                                className="p-1 rounded-md text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
-                                title="Eliminar cita"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => handleCopyQuote(q)}
+                                  className="p-1.5 rounded-md text-neutral-400 hover:text-current hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+                                  title="Copiar texto"
+                                >
+                                  {copiedQuoteId === q.id ? (
+                                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => onDeleteQuote(q.id)}
+                                  className="p-1.5 rounded-md text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+                                  title="Eliminar cita"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </>
                   )}
                 </div>

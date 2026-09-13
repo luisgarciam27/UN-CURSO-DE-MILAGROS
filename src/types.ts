@@ -79,6 +79,24 @@ export interface PersonalNote {
   createdAt: number;
 }
 
+export interface PrayerField {
+  key: string;
+  label: string;
+  placeholder: string;
+  defaultValue?: string;
+}
+
+export interface PrayerItem {
+  id: string;
+  title: string;
+  category: 'sanacion' | 'conflictos' | 'rendicion' | 'relaciones' | 'familia' | 'abundancia';
+  categoryLabel: string;
+  description: string;
+  textTemplate: string; // contains placeholders like {problema}, {persona}, etc.
+  fields?: PrayerField[];
+  additionalNote?: string;
+}
+
 declare global {
   interface Window {
     pdfjsLib?: any;

@@ -10,6 +10,7 @@ import { TypographySettingsModal } from './components/TypographySettingsModal';
 import { AudioPlayerBar } from './components/AudioPlayerBar';
 import { AddNoteModal } from './components/AddNoteModal';
 import { PersonalNotesModal } from './components/PersonalNotesModal';
+import { OracionesPerdonModal } from './components/OracionesPerdonModal';
 import {
   Bookmark,
   SavedQuote,
@@ -144,6 +145,7 @@ export default function App() {
 
   const [activeNoteRequest, setActiveNoteRequest] = useState<{ text: string; page: number } | null>(null);
   const [isPersonalNotesModalOpen, setIsPersonalNotesModalOpen] = useState<boolean>(false);
+  const [isOracionesModalOpen, setIsOracionesModalOpen] = useState<boolean>(false);
 
   const handleSavePersonalNote = (noteText: string, selectedText: string, page: number) => {
     const ch = getChapterForPage(page);
@@ -158,6 +160,20 @@ export default function App() {
     };
     setPersonalNotes((prev) => [newNote, ...prev]);
     setActiveNoteRequest(null);
+  };
+
+  const handleSavePrayerAsNote = (title: string, prayerText: string) => {
+    const ch = getChapterForPage(currentPage);
+    const newNote: PersonalNote = {
+      id: Math.random().toString(36).substring(2, 9),
+      page: currentPage,
+      chapterNumber: ch.number,
+      chapterTitle: ch.title,
+      selectedText: `[Oración del Perdón]: ${title}`,
+      noteText: prayerText,
+      createdAt: Date.now(),
+    };
+    setPersonalNotes((prev) => [newNote, ...prev]);
   };
 
   const handleDeletePersonalNote = (id: string) => {
@@ -363,14 +379,19 @@ export default function App() {
     }
   }, [currentPage, isCurrentBookmarked, pages]);
 
-  // Save inspiring quote
-  const handleSaveQuote = useCallback((text: string) => {
+  // Save inspiring quote / highlight with color support
+  const handleSaveQuote = useCallback((text: string, color?: string) => {
     const ch = getChapterForPage(currentPage);
     const id = `quote-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
     setSavedQuotes((prev) => {
-      if (prev.some((q) => q.page === currentPage && q.text === text)) {
+      const existing = prev.find((q) => q.page === currentPage && q.text === text);
+      if (existing) {
+        if (color && existing.color !== color) {
+          // Update color if different
+          return prev.map((q) => (q.id === existing.id ? { ...q, color } : q));
+        }
         // Toggle off if already saved
-        return prev.filter((q) => !(q.page === currentPage && q.text === text));
+        return prev.filter((q) => q.id !== existing.id);
       }
       return [
         {
@@ -380,6 +401,7 @@ export default function App() {
           chapterTitle: ch.title,
           text,
           createdAt: Date.now(),
+          color: color || 'gold',
         },
         ...prev,
       ];
@@ -427,176 +449,184 @@ export default function App() {
 
   const currentChapter = getChapterForPage(currentPage);
 
-  // Welcome Screen
-  if (view === 'welcome') {
-    return (
-      <WelcomeScreen
-        lastPage={savedLastPage}
-        theme={theme}
-        onToggleTheme={handleToggleThemeQuick}
-        onContinue={() => {
-          setCurrentPage(savedLastPage);
-          setView('reader');
-        }}
-        onStartBeginning={() => {
-          setCurrentPage(1);
-          setView('reader');
-        }}
-        onOpenIndex={() => {
-          setView('reader');
-          setIsDrawerOpen(true);
-        }}
-      />
-    );
-  }
-
   return (
-    <div
-      id="ucdm-reader-app"
-      className="relative w-screen h-screen overflow-hidden flex bg-[#f5ede0] dark:bg-[#181b22] text-[#3d2f20] dark:text-[#e4e0d6] transition-colors duration-300 select-none"
-    >
-      {/* Top Header Bar */}
-      <ReaderHeader
-        visible={isControlsVisible}
-        currentPage={currentPage}
-        chapterNumber={currentChapter.number}
-        chapterTitle={currentChapter.title}
-        displayMode={displayMode}
-        theme={theme}
-        isBookmarked={isCurrentBookmarked}
-        isAudioActive={isAudioActive}
-        onToggleBookmark={handleToggleBookmark}
-        onToggleDrawer={() => setIsDrawerOpen((o) => !o)}
-        onToggleDisplayMode={() =>
-          setDisplayMode((m) => (m === 'ebook' ? 'facsimile' : 'ebook'))
-        }
-        onOpenTypography={() => setIsTypographyOpen(true)}
-        onToggleAudio={() => setIsAudioActive((a) => !a)}
-        onOpenSearch={() => setIsSearchOpen(true)}
-        onGoHome={() => setView('welcome')}
-        onSeekPage={handleSeekPage}
-      />
-
-      {/* Main Reading Frame with Desktop Docking Support */}
-      <div className="flex-1 flex h-full w-full relative overflow-hidden">
-        {/* Docked Sidebar (Desktop > 1100px) */}
-        {isDrawerDocked && (
-          <div className="hidden lg:block w-[380px] xl:w-[400px] h-full flex-shrink-0 z-20">
-            <ChapterDrawer
-              isOpen={true}
-              isDocked={true}
-              currentPage={currentPage}
-              bookmarks={bookmarks}
-              savedQuotes={savedQuotes}
-              personalNotes={personalNotes}
-              onClose={() => setIsDrawerDocked(false)}
-              onSelectPage={handleSeekPage}
-              onDeleteBookmark={(p) => setBookmarks((b) => b.filter((item) => item.page !== p))}
-              onClearAllBookmarks={() => setBookmarks([])}
-              onDeleteQuote={handleDeleteQuote}
-              onClearAllQuotes={handleClearAllQuotes}
-              onDeletePersonalNote={handleDeletePersonalNote}
-              onClearAllPersonalNotes={handleClearAllPersonalNotes}
-              onToggleDocked={() => setIsDrawerDocked((d) => !d)}
-              onOpenSearch={() => setIsSearchOpen(true)}
-              onGoHome={() => setView('welcome')}
-            />
-          </div>
-        )}
-
-        {/* Modal Drawer (Mobile, Tablet, and Desktop when unpinned) */}
-        {(!isDrawerDocked || !window.matchMedia('(min-width: 1100px)').matches) && (
-          <ChapterDrawer
-            isOpen={isDrawerOpen}
-            isDocked={false}
+    <>
+      {view === 'welcome' ? (
+        <WelcomeScreen
+          lastPage={savedLastPage}
+          theme={theme}
+          onToggleTheme={handleToggleThemeQuick}
+          onContinue={() => {
+            setIsOracionesModalOpen(false);
+            setCurrentPage(savedLastPage);
+            setView('reader');
+          }}
+          onStartBeginning={() => {
+            setIsOracionesModalOpen(false);
+            setCurrentPage(1);
+            setView('reader');
+          }}
+          onOpenIndex={() => {
+            setIsOracionesModalOpen(false);
+            setView('reader');
+            setIsDrawerOpen(true);
+          }}
+          onOpenOraciones={() => setIsOracionesModalOpen(true)}
+        />
+      ) : (
+        <div
+          id="ucdm-reader-app"
+          className="relative w-screen h-screen overflow-hidden flex bg-[#f5ede0] dark:bg-[#181b22] text-[#3d2f20] dark:text-[#e4e0d6] transition-colors duration-300 select-none"
+        >
+          {/* Top Header Bar */}
+          <ReaderHeader
+            visible={isControlsVisible}
             currentPage={currentPage}
-            bookmarks={bookmarks}
-            savedQuotes={savedQuotes}
-            personalNotes={personalNotes}
-            onClose={() => setIsDrawerOpen(false)}
-            onSelectPage={handleSeekPage}
-            onDeleteBookmark={(p) => setBookmarks((b) => b.filter((item) => item.page !== p))}
-            onClearAllBookmarks={() => setBookmarks([])}
-            onDeleteQuote={handleDeleteQuote}
-            onClearAllQuotes={handleClearAllQuotes}
-            onDeletePersonalNote={handleDeletePersonalNote}
-            onClearAllPersonalNotes={handleClearAllPersonalNotes}
-            onToggleDocked={() => {
-              setIsDrawerDocked(true);
-              setIsDrawerOpen(false);
-            }}
+            chapterNumber={currentChapter.number}
+            chapterTitle={currentChapter.title}
+            displayMode={displayMode}
+            theme={theme}
+            isBookmarked={isCurrentBookmarked}
+            isAudioActive={isAudioActive}
+            onToggleBookmark={handleToggleBookmark}
+            onToggleDrawer={() => setIsDrawerOpen((o) => !o)}
+            onToggleDisplayMode={() =>
+              setDisplayMode((m) => (m === 'ebook' ? 'facsimile' : 'ebook'))
+            }
+            onOpenTypography={() => setIsTypographyOpen(true)}
+            onToggleAudio={() => setIsAudioActive((a) => !a)}
             onOpenSearch={() => setIsSearchOpen(true)}
+            onOpenOraciones={() => setIsOracionesModalOpen(true)}
+            onGoHome={() => setView('welcome')}
+            onSeekPage={handleSeekPage}
+          />
+
+          {/* Main Reading Frame with Desktop Docking Support */}
+          <div className="flex-1 flex h-full w-full relative overflow-hidden">
+            {/* Docked Sidebar (Desktop > 1100px) */}
+            {isDrawerDocked && (
+              <div className="hidden lg:block w-[380px] xl:w-[400px] h-full flex-shrink-0 z-20">
+                <ChapterDrawer
+                  isOpen={true}
+                  isDocked={true}
+                  currentPage={currentPage}
+                  bookmarks={bookmarks}
+                  savedQuotes={savedQuotes}
+                  personalNotes={personalNotes}
+                  onClose={() => setIsDrawerDocked(false)}
+                  onSelectPage={handleSeekPage}
+                  onDeleteBookmark={(p) => setBookmarks((b) => b.filter((item) => item.page !== p))}
+                  onClearAllBookmarks={() => setBookmarks([])}
+                  onDeleteQuote={handleDeleteQuote}
+                  onClearAllQuotes={handleClearAllQuotes}
+                  onDeletePersonalNote={handleDeletePersonalNote}
+                  onClearAllPersonalNotes={handleClearAllPersonalNotes}
+                  onToggleDocked={() => setIsDrawerDocked((d) => !d)}
+                  onOpenSearch={() => setIsSearchOpen(true)}
+                  onOpenOraciones={() => setIsOracionesModalOpen(true)}
+                  onGoHome={() => setView('welcome')}
+                />
+              </div>
+            )}
+
+            {/* Modal Drawer (Mobile, Tablet, and Desktop when unpinned) */}
+            {(!isDrawerDocked || !window.matchMedia('(min-width: 1100px)').matches) && (
+              <ChapterDrawer
+                isOpen={isDrawerOpen}
+                isDocked={false}
+                currentPage={currentPage}
+                bookmarks={bookmarks}
+                savedQuotes={savedQuotes}
+                personalNotes={personalNotes}
+                onClose={() => setIsDrawerOpen(false)}
+                onSelectPage={handleSeekPage}
+                onDeleteBookmark={(p) => setBookmarks((b) => b.filter((item) => item.page !== p))}
+                onClearAllBookmarks={() => setBookmarks([])}
+                onDeleteQuote={handleDeleteQuote}
+                onClearAllQuotes={handleClearAllQuotes}
+                onDeletePersonalNote={handleDeletePersonalNote}
+                onClearAllPersonalNotes={handleClearAllPersonalNotes}
+                onToggleDocked={() => {
+                  setIsDrawerDocked(true);
+                  setIsDrawerOpen(false);
+                }}
+                onOpenSearch={() => setIsSearchOpen(true)}
+                onOpenOraciones={() => setIsOracionesModalOpen(true)}
+                onGoHome={() => setView('welcome')}
+              />
+            )}
+
+            {/* Primary Reading Engine: EBookReader (Default Reflowable) OR FacsimileViewer (PDF) */}
+            {displayMode === 'ebook' ? (
+              <EBookReader
+                pageData={currentPageData}
+                currentPage={currentPage}
+                theme={theme}
+                fontFamily={fontFamily}
+                fontSize={fontSize}
+                lineHeight={lineHeight}
+                readingWidth={readingWidth}
+                isControlsVisible={isControlsVisible}
+                isBookmarked={isCurrentBookmarked}
+                activeSpeechParagraph={activeSpeechParagraph}
+                savedQuotes={savedQuotes}
+                personalNotes={personalNotes}
+                onPrevPage={handlePrevPage}
+                onNextPage={handleNextPage}
+                onToggleControls={() => setIsControlsVisible((v) => !v)}
+                onToggleBookmark={handleToggleBookmark}
+                onSaveQuote={handleSaveQuote}
+                onDeleteQuote={handleDeleteQuote}
+                onAddNoteRequest={(text, page) => setActiveNoteRequest({ text, page })}
+                onPlayFromParagraph={(idx) => {
+                  setIsAudioActive(true);
+                  setActiveSpeechParagraph(idx);
+                }}
+              />
+            ) : (
+              <FacsimileViewer
+                pdfDoc={pdfDoc}
+                currentPage={currentPage}
+                theme={theme}
+                isControlsVisible={isControlsVisible}
+                onPrevPage={handlePrevPage}
+                onNextPage={handleNextPage}
+                onToggleControls={() => setIsControlsVisible((v) => !v)}
+              />
+            )}
+          </div>
+
+          {/* Bottom Scrubber & Toolbar */}
+          <ReaderFooter
+            visible={isControlsVisible}
+            currentPage={currentPage}
+            theme={theme}
+            isFullscreen={isFullscreen}
+            isBookmarked={isCurrentBookmarked}
+            onPrevPage={handlePrevPage}
+            onNextPage={handleNextPage}
+            onSeekPage={handleSeekPage}
+            onOpenTypography={() => setIsTypographyOpen(true)}
+            onToggleBookmark={handleToggleBookmark}
+            onToggleFullscreen={handleToggleFullscreen}
             onGoHome={() => setView('welcome')}
           />
-        )}
 
-        {/* Primary Reading Engine: EBookReader (Default Reflowable) OR FacsimileViewer (PDF) */}
-        {displayMode === 'ebook' ? (
-          <EBookReader
-            pageData={currentPageData}
-            currentPage={currentPage}
-            theme={theme}
-            fontFamily={fontFamily}
-            fontSize={fontSize}
-            lineHeight={lineHeight}
-            readingWidth={readingWidth}
-            isControlsVisible={isControlsVisible}
-            isBookmarked={isCurrentBookmarked}
-            activeSpeechParagraph={activeSpeechParagraph}
-            savedQuotes={savedQuotes}
-            onPrevPage={handlePrevPage}
-            onNextPage={handleNextPage}
-            onToggleControls={() => setIsControlsVisible((v) => !v)}
-            onToggleBookmark={handleToggleBookmark}
-            onSaveQuote={handleSaveQuote}
-            onAddNoteRequest={(text, page) => setActiveNoteRequest({ text, page })}
-            onPlayFromParagraph={(idx) => {
-              setIsAudioActive(true);
-              setActiveSpeechParagraph(idx);
-            }}
-          />
-        ) : (
-          <FacsimileViewer
-            pdfDoc={pdfDoc}
-            currentPage={currentPage}
-            theme={theme}
-            isControlsVisible={isControlsVisible}
-            onPrevPage={handlePrevPage}
-            onNextPage={handleNextPage}
-            onToggleControls={() => setIsControlsVisible((v) => !v)}
-          />
-        )}
-      </div>
-
-      {/* Bottom Scrubber & Toolbar */}
-      <ReaderFooter
-        visible={isControlsVisible}
-        currentPage={currentPage}
-        theme={theme}
-        isFullscreen={isFullscreen}
-        isBookmarked={isCurrentBookmarked}
-        onPrevPage={handlePrevPage}
-        onNextPage={handleNextPage}
-        onSeekPage={handleSeekPage}
-        onOpenTypography={() => setIsTypographyOpen(true)}
-        onToggleBookmark={handleToggleBookmark}
-        onToggleFullscreen={handleToggleFullscreen}
-        onGoHome={() => setView('welcome')}
-      />
-
-      {/* Floating Audio Narrator Player */}
-      {isAudioActive && (
-        <AudioPlayerBar
-          pageData={currentPageData}
-          currentPage={currentPage}
-          theme={theme}
-          activeParagraphIndex={activeSpeechParagraph}
-          onActiveParagraphChange={setActiveSpeechParagraph}
-          onClose={() => {
-            setIsAudioActive(false);
-            setActiveSpeechParagraph(null);
-          }}
-        />
+          {/* Floating Audio Narrator Player */}
+          {isAudioActive && (
+            <AudioPlayerBar
+              pageData={currentPageData}
+              currentPage={currentPage}
+              theme={theme}
+              activeParagraphIndex={activeSpeechParagraph}
+              onActiveParagraphChange={setActiveSpeechParagraph}
+              onClose={() => {
+                setIsAudioActive(false);
+                setActiveSpeechParagraph(null);
+              }}
+            />
+          )}
+        </div>
       )}
 
       {/* Typography & Themes Modal ('Aa') */}
@@ -621,7 +651,10 @@ export default function App() {
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        onSelectPage={handleSeekPage}
+        onSelectPage={(p) => {
+          handleSeekPage(p);
+          if (view !== 'reader') setView('reader');
+        }}
       />
 
       {activeNoteRequest && (
@@ -646,8 +679,19 @@ export default function App() {
         onJumpToPage={(p) => {
           handleSeekPage(p);
           setIsPersonalNotesModalOpen(false);
+          setView('reader');
         }}
       />
-    </div>
+
+      <OracionesPerdonModal
+        isOpen={isOracionesModalOpen}
+        onClose={() => setIsOracionesModalOpen(false)}
+        onSaveAsNote={handleSavePrayerAsNote}
+        onGoToReading={() => {
+          setIsOracionesModalOpen(false);
+          setView('reader');
+        }}
+      />
+    </>
   );
 }

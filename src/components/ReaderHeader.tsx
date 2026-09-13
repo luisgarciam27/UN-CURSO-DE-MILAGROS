@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, BookOpen, FileText, Type, Volume2, Bookmark as BookmarkIcon, Search, Home, ChevronRight } from 'lucide-react';
+import { Menu, BookOpen, FileText, Type, Volume2, Bookmark as BookmarkIcon, Search, Home, ChevronRight, Sparkles } from 'lucide-react';
 import { ReaderDisplayMode, BookTheme } from '../types';
 import { THEME_CONFIG, TOTAL_PAGES } from '../constants';
 
@@ -18,6 +18,7 @@ interface ReaderHeaderProps {
   onOpenTypography: () => void;
   onToggleAudio: () => void;
   onOpenSearch: () => void;
+  onOpenOraciones: () => void;
   onGoHome: () => void;
   onSeekPage: (page: number) => void;
 }
@@ -37,6 +38,7 @@ export const ReaderHeader: React.FC<ReaderHeaderProps> = ({
   onOpenTypography,
   onToggleAudio,
   onOpenSearch,
+  onOpenOraciones,
   onGoHome,
   onSeekPage,
 }) => {
@@ -175,6 +177,16 @@ export const ReaderHeader: React.FC<ReaderHeaderProps> = ({
             title={isBookmarked ? "Marcador guardado en esta página" : "Añadir marcador a esta página"}
           >
             <BookmarkIcon className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${isBookmarked ? 'fill-current' : ''}`} />
+          </button>
+
+          {/* Oraciones del Perdón Button */}
+          <button
+            id="btn-header-oraciones"
+            onClick={onOpenOraciones}
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all cursor-pointer text-amber-700 dark:text-amber-300 shadow-xs"
+            title="Oraciones del Perdón (UCDM)"
+          >
+            <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </button>
 
           {/* Search Button (Desktop) */}

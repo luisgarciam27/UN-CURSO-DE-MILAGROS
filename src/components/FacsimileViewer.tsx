@@ -31,6 +31,13 @@ export const FacsimileViewer: React.FC<FacsimileViewerProps> = ({
   const [isLoadingPage, setIsLoadingPage] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
 
+  // Touch gesture state for tactile page turning
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const [dragOffset, setDragOffset] = useState<number>(0);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const gestureLockRef = useRef<'undecided' | 'scroll' | 'swipe'>('undecided');
+  const hapticFiredRef = useRef<boolean>(false);
+
   const themeStyle = THEME_CONFIG[theme];
 
   // Render current PDF page with safe containment and cancellation
@@ -165,10 +172,129 @@ export const FacsimileViewer: React.FC<FacsimileViewerProps> = ({
     };
   }, [renderPage]);
 
+  // Touch handlers for facsimile swipe gesture
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Only enable swipe if zoom is at or near default (not zoomed in for panning)
+    if (zoomLevel > 1.18) return;
+    const touch = e.touches[0];
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+    };
+    gestureLockRef.current = 'undecided';
+    hapticFiredRef.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!touchStartRef.current || zoomLevel > 1.18) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (gestureLockRef.current === 'undecided') {
+      if (absX > 6 || absY > 6) {
+        if (absY > absX * 1.1) {
+          gestureLockRef.current = 'scroll';
+          return;
+        } else {
+          gestureLockRef.current = 'swipe';
+          setIsDragging(true);
+        }
+      }
+    }
+
+    if (gestureLockRef.current === 'swipe') {
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+
+      let damped = deltaX;
+      if (currentPage <= 1 && deltaX > 0) {
+        damped = Math.sign(deltaX) * Math.pow(Math.abs(deltaX), 0.72) * 0.45;
+      } else if (currentPage >= TOTAL_PAGES && deltaX < 0) {
+        damped = Math.sign(deltaX) * Math.pow(Math.abs(deltaX), 0.72) * 0.45;
+      }
+
+      setDragOffset(damped);
+
+      const isPastThreshold = Math.abs(damped) > 55;
+      if (isPastThreshold && !hapticFiredRef.current) {
+        hapticFiredRef.current = true;
+        if ('vibrate' in navigator) {
+          try {
+            navigator.vibrate(8);
+          } catch {}
+        }
+      } else if (!isPastThreshold && hapticFiredRef.current) {
+        hapticFiredRef.current = false;
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!touchStartRef.current) return;
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaTime = Date.now() - touchStartRef.current.time;
+
+    const wasSwiping = gestureLockRef.current === 'swipe';
+    const currentOffset = dragOffset;
+
+    setIsDragging(false);
+    setDragOffset(0);
+    gestureLockRef.current = 'undecided';
+
+    if (wasSwiping) {
+      const isFlick = deltaTime < 280 && Math.abs(currentOffset) > 32;
+      const isDragPass = Math.abs(currentOffset) > 55;
+
+      if (isFlick || isDragPass) {
+        if (currentOffset < 0 && currentPage < TOTAL_PAGES) {
+          onNextPage();
+        } else if (currentOffset > 0 && currentPage > 1) {
+          onPrevPage();
+        }
+      }
+      touchStartRef.current = null;
+      return;
+    }
+
+    // Quick tap to toggle controls
+    if (Math.abs(deltaX) < 10) {
+      if (!(e.target as HTMLElement).closest('button, .zoom-controls')) {
+        onToggleControls();
+      }
+    }
+    touchStartRef.current = null;
+  };
+
+  // Keyboard arrow navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        onNextPage();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        onPrevPage();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onNextPage, onPrevPage]);
+
   return (
     <div
       id="facsimile-viewer-viewport"
       ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest('button, .zoom-controls')) return;
         onToggleControls();
@@ -179,6 +305,30 @@ export const FacsimileViewer: React.FC<FacsimileViewerProps> = ({
         paddingBottom: isControlsVisible ? '5rem' : '2rem',
       }}
     >
+      {/* Floating Swipe Cue Badge */}
+      {isDragging && Math.abs(dragOffset) > 28 && (
+        <div
+          className={`fixed top-1/2 -translate-y-1/2 z-40 pointer-events-none flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-sans-ui font-semibold shadow-2xl backdrop-blur-md transition-all ${
+            dragOffset < 0 ? 'right-4 sm:right-8' : 'left-4 sm:left-8'
+          } ${
+            Math.abs(dragOffset) > 55
+              ? 'bg-[#8c6b2d] text-white ring-2 ring-[#d4af37]/80 scale-105'
+              : 'bg-black/75 dark:bg-white/90 text-white dark:text-neutral-900 ring-1 ring-white/20'
+          }`}
+        >
+          {dragOffset > 0 ? (
+            <>
+              <ChevronLeft className="w-4 h-4 animate-pulse" />
+              <span>{currentPage > 1 ? `Pág. ${currentPage - 1}` : 'Inicio del libro'}</span>
+            </>
+          ) : (
+            <>
+              <span>{currentPage < TOTAL_PAGES ? `Pág. ${currentPage + 1}` : 'Fin del texto'}</span>
+              <ChevronRight className="w-4 h-4 animate-pulse" />
+            </>
+          )}
+        </div>
+      )}
       {/* Floating Zoom Controls */}
       <div className="absolute top-18 right-4 z-20 zoom-controls flex items-center gap-1.5 p-1 rounded-xl bg-black/60 text-white backdrop-blur-md shadow-lg text-xs font-sans-ui">
         <button
@@ -234,8 +384,14 @@ export const FacsimileViewer: React.FC<FacsimileViewerProps> = ({
         </button>
       </div>
 
-      {/* Canvas Paper Representation */}
-      <div className="relative my-auto flex flex-col items-center justify-center max-w-full">
+      {/* Canvas Paper Representation with Interactive Tactile Turn */}
+      <div
+        className="relative my-auto flex flex-col items-center justify-center max-w-full"
+        style={{
+          transform: isDragging ? `translateX(${dragOffset}px) rotate(${dragOffset * 0.016}deg)` : 'none',
+          transition: isDragging ? 'none' : 'transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        }}
+      >
         <div
           className={`relative rounded-md shadow-2xl overflow-hidden border ${themeStyle.border} bg-white dark:bg-[#121418] max-w-full`}
         >

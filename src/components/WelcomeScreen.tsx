@@ -10,6 +10,7 @@ interface WelcomeScreenProps {
   onContinue: () => void;
   onStartBeginning: () => void;
   onOpenIndex: () => void;
+  onOpenOraciones?: () => void;
   onCustomFileLoaded?: (file: File) => void;
 }
 
@@ -20,6 +21,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onContinue,
   onStartBeginning,
   onOpenIndex,
+  onOpenOraciones,
   onCustomFileLoaded,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -102,17 +104,17 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </div>
 
           {/* Primary Action Buttons */}
-          <div className="flex flex-col gap-3.5 w-full max-w-md mx-auto">
+          <div className="flex flex-col gap-3 w-full max-w-md mx-auto">
             {hasProgress && (
               <button
                 id="btn-welcome-continue"
                 onClick={onContinue}
-                className="group w-full flex items-center justify-between px-5 py-3.5 rounded-xl bg-[#2e3e4e] hover:bg-[#253240] dark:bg-[#d4af37] dark:hover:bg-[#c29e2f] text-white dark:text-[#14171c] font-sans-ui font-medium text-sm sm:text-base shadow-sm hover:shadow-md transition-all cursor-pointer"
+                className="group w-full flex items-center justify-between px-5 py-3.5 rounded-xl bg-[#2e3e4e] hover:bg-[#253240] dark:bg-[#d4af37] dark:hover:bg-[#c29e2f] text-white dark:text-[#14171c] font-sans-ui font-medium text-sm sm:text-base shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
               >
                 <div className="flex items-center gap-3 text-left">
                   <BookOpen className="w-5 h-5 flex-shrink-0" />
                   <div>
-                    <div className="font-semibold">Continuar leyendo</div>
+                    <div className="font-semibold">Continuar lectura</div>
                     <div className="text-xs opacity-85">
                       Pág. {lastPage} de {TOTAL_PAGES} ({progressPercent}%) • Cap. {lastChapter?.number}: {lastChapter?.title}
                     </div>
@@ -125,14 +127,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <button
               id="btn-welcome-start"
               onClick={onStartBeginning}
-              className={`w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl border font-sans-ui font-medium text-sm sm:text-base transition-all cursor-pointer ${
+              className={`w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl border font-sans-ui font-medium text-sm sm:text-base transition-all cursor-pointer active:scale-[0.99] ${
                 hasProgress
                   ? 'border-[#ded8cb] dark:border-[#2f353d] bg-white dark:bg-[#1a1e24] text-[#3c372f] dark:text-[#dfdbd1] hover:bg-[#f2eee5] dark:hover:bg-[#242a33]'
-                  : 'bg-[#2e3e4e] hover:bg-[#253240] dark:bg-[#d4af37] dark:hover:bg-[#c29e2f] text-white dark:text-[#14171c] shadow-sm'
+                  : 'bg-[#2e3e4e] hover:bg-[#253240] dark:bg-[#d4af37] dark:hover:bg-[#c29e2f] text-white dark:text-[#14171c] shadow-sm hover:shadow-md'
               }`}
             >
               <RotateCcw className="w-4 h-4" />
-              <span>{hasProgress ? "Empezar desde el principio (Página 1)" : "Empezar lectura"}</span>
+              <span>{hasProgress ? "Empezar desde el principio (Página 1)" : "Empezar lectura del Texto"}</span>
             </button>
 
             <button
@@ -143,6 +145,31 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               <Compass className="w-4 h-4" />
               <span>Ver índice de los 31 capítulos</span>
             </button>
+
+            {onOpenOraciones && (
+              <div className="pt-2 border-t border-[#ded8cb]/80 dark:border-[#2f353d]/80">
+                <button
+                  id="btn-welcome-oraciones"
+                  onClick={onOpenOraciones}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-[#d4af37]/50 bg-gradient-to-r from-amber-500/15 via-[#d4af37]/10 to-amber-500/15 hover:from-amber-500/25 hover:to-amber-500/25 text-amber-900 dark:text-amber-200 font-sans-ui transition-all cursor-pointer shadow-xs hover:shadow-md group active:scale-[0.99]"
+                >
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#d4af37] to-[#8c6b2d] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform flex-shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-sm text-[#8c6b2d] dark:text-[#d4af37]">
+                        Oraciones del Perdón (UCDM)
+                      </div>
+                      <div className="text-[11px] text-neutral-600 dark:text-neutral-400 font-normal">
+                        25+ oraciones interactivas para cada situación
+                      </div>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#8c6b2d] dark:text-[#d4af37] group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
