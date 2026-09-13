@@ -41,7 +41,6 @@ interface ChapterDrawerProps {
   onClearAllPersonalNotes: () => void;
   onToggleDocked: () => void;
   onOpenSearch: () => void;
-  onOpenOraciones?: () => void;
   onGoHome?: () => void;
 }
 
@@ -62,7 +61,6 @@ export const ChapterDrawer: React.FC<ChapterDrawerProps> = ({
   onClearAllPersonalNotes,
   onToggleDocked,
   onOpenSearch,
-  onOpenOraciones,
   onGoHome,
 }) => {
   const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'quotes' | 'notes'>('chapters');
@@ -336,29 +334,6 @@ export const ChapterDrawer: React.FC<ChapterDrawerProps> = ({
                 </button>
               ))}
             </div>
-          )}
-
-          {/* Oraciones del Perdón Banner Button */}
-          {onOpenOraciones && (
-            <button
-              onClick={onOpenOraciones}
-              className="mt-2.5 w-full p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 flex items-center justify-between text-left transition-all cursor-pointer group shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <div className="text-xs font-serif-book font-bold text-amber-800 dark:text-amber-200">
-                    Oraciones del Perdón (UCDM)
-                  </div>
-                  <div className="text-[10px] text-neutral-500 dark:text-neutral-400 font-sans-ui">
-                    25+ oraciones interactivas para cada situación
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform" />
-            </button>
           )}
         </div>
 

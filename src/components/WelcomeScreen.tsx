@@ -10,7 +10,6 @@ interface WelcomeScreenProps {
   onContinue: () => void;
   onStartBeginning: () => void;
   onOpenIndex: () => void;
-  onOpenOraciones?: () => void;
   onOpenSearch?: () => void;
   onOpenBookmarks?: () => void;
   onCustomFileLoaded?: (file: File) => void;
@@ -23,7 +22,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onContinue,
   onStartBeginning,
   onOpenIndex,
-  onOpenOraciones,
   onOpenSearch,
   onOpenBookmarks,
   onCustomFileLoaded,
@@ -182,30 +180,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 <span className="truncate">31 Capítulos</span>
               </button>
             </div>
-
-            {/* Oraciones del Perdón (UCDM) - High Visibility & Ergonomic Touch Card */}
-            {onOpenOraciones && (
-              <button
-                id="btn-welcome-oraciones"
-                onClick={onOpenOraciones}
-                className="w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-[#d4af37]/60 bg-gradient-to-r from-amber-500/15 via-[#d4af37]/10 to-amber-500/15 hover:from-amber-500/25 hover:to-amber-500/25 text-[#8c6b2d] dark:text-amber-200 font-sans-ui transition-all cursor-pointer shadow-xs hover:shadow-md group active:scale-[0.99] text-left"
-              >
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-[#d4af37] to-[#8c6b2d] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform flex-shrink-0">
-                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-xs sm:text-sm text-[#8c6b2d] dark:text-[#d4af37] leading-tight">
-                      Oraciones del Perdón (UCDM)
-                    </div>
-                    <div className="text-[10px] sm:text-[11px] text-neutral-600 dark:text-neutral-400 font-normal truncate mt-0.5">
-                      25+ oraciones interactivas por tema y situación
-                    </div>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-[#8c6b2d] dark:text-[#d4af37] group-hover:translate-x-1 transition-transform flex-shrink-0 ml-1.5" />
-              </button>
-            )}
 
             {/* Quick Tools Row (Buscador, Guardados, PDF) */}
             <div className="grid grid-cols-3 gap-1.5 pt-1 w-full text-[11px] font-sans-ui">

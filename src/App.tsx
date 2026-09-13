@@ -10,7 +10,6 @@ import { TypographySettingsModal } from './components/TypographySettingsModal';
 import { AudioPlayerBar } from './components/AudioPlayerBar';
 import { AddNoteModal } from './components/AddNoteModal';
 import { PersonalNotesModal } from './components/PersonalNotesModal';
-import { OracionesPerdonModal } from './components/OracionesPerdonModal';
 import {
   Bookmark,
   SavedQuote,
@@ -145,7 +144,6 @@ export default function App() {
 
   const [activeNoteRequest, setActiveNoteRequest] = useState<{ text: string; page: number } | null>(null);
   const [isPersonalNotesModalOpen, setIsPersonalNotesModalOpen] = useState<boolean>(false);
-  const [isOracionesModalOpen, setIsOracionesModalOpen] = useState<boolean>(false);
 
   const handleSavePersonalNote = (noteText: string, selectedText: string, page: number) => {
     const ch = getChapterForPage(page);
@@ -160,20 +158,6 @@ export default function App() {
     };
     setPersonalNotes((prev) => [newNote, ...prev]);
     setActiveNoteRequest(null);
-  };
-
-  const handleSavePrayerAsNote = (title: string, prayerText: string) => {
-    const ch = getChapterForPage(currentPage);
-    const newNote: PersonalNote = {
-      id: Math.random().toString(36).substring(2, 9),
-      page: currentPage,
-      chapterNumber: ch.number,
-      chapterTitle: ch.title,
-      selectedText: `[Oración del Perdón]: ${title}`,
-      noteText: prayerText,
-      createdAt: Date.now(),
-    };
-    setPersonalNotes((prev) => [newNote, ...prev]);
   };
 
   const handleDeletePersonalNote = (id: string) => {
@@ -472,24 +456,19 @@ export default function App() {
           theme={theme}
           onToggleTheme={handleToggleThemeQuick}
           onContinue={() => {
-            setIsOracionesModalOpen(false);
             setCurrentPage(savedLastPage);
             setView('reader');
           }}
           onStartBeginning={() => {
-            setIsOracionesModalOpen(false);
             setCurrentPage(1);
             setView('reader');
           }}
           onOpenIndex={() => {
-            setIsOracionesModalOpen(false);
             setView('reader');
             setIsDrawerOpen(true);
           }}
-          onOpenOraciones={() => setIsOracionesModalOpen(true)}
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenBookmarks={() => {
-            setIsOracionesModalOpen(false);
             setView('reader');
             setIsDrawerOpen(true);
           }}
@@ -518,7 +497,6 @@ export default function App() {
             onOpenTypography={() => setIsTypographyOpen(true)}
             onToggleAudio={() => setIsAudioActive((a) => !a)}
             onOpenSearch={() => setIsSearchOpen(true)}
-            onOpenOraciones={() => setIsOracionesModalOpen(true)}
             onGoHome={() => setView('welcome')}
             onSeekPage={handleSeekPage}
           />
@@ -545,7 +523,6 @@ export default function App() {
                   onClearAllPersonalNotes={handleClearAllPersonalNotes}
                   onToggleDocked={() => setIsDrawerDocked((d) => !d)}
                   onOpenSearch={() => setIsSearchOpen(true)}
-                  onOpenOraciones={() => setIsOracionesModalOpen(true)}
                   onGoHome={() => setView('welcome')}
                 />
               </div>
@@ -573,7 +550,6 @@ export default function App() {
                   setIsDrawerOpen(false);
                 }}
                 onOpenSearch={() => setIsSearchOpen(true)}
-                onOpenOraciones={() => setIsOracionesModalOpen(true)}
                 onGoHome={() => setView('welcome')}
               />
             )}
@@ -701,16 +677,6 @@ export default function App() {
         onJumpToPage={(p) => {
           handleSeekPage(p);
           setIsPersonalNotesModalOpen(false);
-          setView('reader');
-        }}
-      />
-
-      <OracionesPerdonModal
-        isOpen={isOracionesModalOpen}
-        onClose={() => setIsOracionesModalOpen(false)}
-        onSaveAsNote={handleSavePrayerAsNote}
-        onGoToReading={() => {
-          setIsOracionesModalOpen(false);
           setView('reader');
         }}
       />
