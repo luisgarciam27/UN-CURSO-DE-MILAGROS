@@ -1350,10 +1350,10 @@ export const EBookReader: React.FC<EBookReaderProps> = ({
 
           return (
             <div
-              className={`fixed z-50 rounded-2xl shadow-2xl bg-[#1c1917]/95 dark:bg-[#13161c]/95 text-[#f5f2eb] border border-[#d4af37]/45 backdrop-blur-xl animate-fade-in p-3 w-[94vw] sm:w-auto sm:max-w-xl ${
+              className={`fixed z-50 rounded-2xl shadow-2xl bg-[#1c1917]/95 dark:bg-[#13161c]/95 text-[#f5f2eb] border border-[#d4af37]/45 backdrop-blur-xl animate-fade-in p-2.5 sm:p-3 w-[95vw] sm:w-auto sm:max-w-xl ${
                 selectionState.rect
-                  ? 'bottom-4 left-1/2 -translate-x-1/2 sm:bottom-auto sm:left-auto sm:translate-x-0'
-                  : 'bottom-4 left-1/2 -translate-x-1/2'
+                  ? 'bottom-[calc(env(safe-area-inset-bottom,0px)+4.5rem)] left-1/2 -translate-x-1/2 sm:bottom-auto sm:left-auto sm:translate-x-0'
+                  : 'bottom-[calc(env(safe-area-inset-bottom,0px)+4.5rem)] left-1/2 -translate-x-1/2'
               }`}
               style={
                 selectionState.rect && typeof window !== 'undefined' && window.innerWidth >= 640

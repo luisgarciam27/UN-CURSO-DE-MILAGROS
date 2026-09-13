@@ -205,8 +205,8 @@ export const OracionesPerdonModal: React.FC<OracionesPerdonModalProps> = ({
   const currentPrayer = activePrayer || (filteredPrayers.length > 0 ? filteredPrayers[0] : null);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-      <div className={`relative w-full ${isZenMode ? 'max-w-5xl h-[98vh]' : 'max-w-5xl h-[94vh] sm:h-[88vh] max-h-[780px]'} bg-[#fffefc] dark:bg-[#141311] text-[#242320] dark:text-[#f2efe9] rounded-2xl shadow-2xl border border-[#d4af37]/40 flex flex-col overflow-hidden`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1.5 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+      <div className={`relative w-full ${isZenMode ? 'max-w-5xl h-[98dvh]' : 'max-w-5xl h-[96dvh] sm:h-[88vh] max-h-[780px]'} bg-[#fffefc] dark:bg-[#141311] text-[#242320] dark:text-[#f2efe9] rounded-2xl shadow-2xl border border-[#d4af37]/40 flex flex-col overflow-hidden`}>
         
         {/* Compact, Clean Header */}
         <div className="px-3.5 sm:px-5 py-2.5 border-b border-[#d4af37]/30 flex items-center justify-between bg-gradient-to-r from-[#8c6b2d]/15 via-transparent to-[#8c6b2d]/15 flex-shrink-0">

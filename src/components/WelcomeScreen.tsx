@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Compass, RotateCcw, ArrowRight, Sun, Moon, Sparkles } from 'lucide-react';
+import { BookOpen, Compass, RotateCcw, ArrowRight, Sun, Moon, Sparkles, Search, Bookmark as BookmarkIcon, FileUp } from 'lucide-react';
 import { BOOK_TITLE, BOOK_SUBTITLE, BOOK_FOUNDATION, BOOK_TRANSLATION, getChapterForPage, TOTAL_PAGES } from '../constants';
 import { BookTheme } from '../types';
 
@@ -11,6 +11,8 @@ interface WelcomeScreenProps {
   onStartBeginning: () => void;
   onOpenIndex: () => void;
   onOpenOraciones?: () => void;
+  onOpenSearch?: () => void;
+  onOpenBookmarks?: () => void;
   onCustomFileLoaded?: (file: File) => void;
 }
 
@@ -22,13 +24,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onStartBeginning,
   onOpenIndex,
   onOpenOraciones,
+  onOpenSearch,
+  onOpenBookmarks,
   onCustomFileLoaded,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const isDark = theme === 'dark' || theme === 'midnight';
   const hasProgress = lastPage > 1;
   const lastChapter = hasProgress ? getChapterForPage(lastPage) : null;
-  const progressPercent = Math.round((lastPage / TOTAL_PAGES) * 100);
+  const progressPercent = Math.min(100, Math.max(1, Math.round((lastPage / TOTAL_PAGES) * 100)));
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -40,165 +44,218 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   return (
     <div
       id="welcome-screen"
-      className="min-h-screen w-full flex flex-col justify-between items-center px-4 py-6 md:py-10 bg-[#f7f5f0] dark:bg-[#121417] text-[#2c2925] dark:text-[#e4e1d9] transition-colors duration-300 relative overflow-y-auto"
+      className="min-h-[100dvh] w-full flex flex-col justify-between items-center px-3 sm:px-6 py-2.5 sm:py-5 bg-[#f7f5f0] dark:bg-[#121417] text-[#2c2925] dark:text-[#e4e1d9] transition-colors duration-300 relative overflow-y-auto overscroll-y-contain pb-24 sm:pb-8"
     >
-      {/* Top Bar on Welcome Screen */}
-      <header className="w-full max-w-4xl flex justify-between items-center z-10">
-        <div className="flex items-center gap-2 text-xs md:text-sm tracking-widest text-[#726d63] dark:text-[#9d978a] font-sans-ui uppercase">
-          <Sparkles className="w-4 h-4 text-[#99793d] dark:text-[#d4af37]" />
+      {/* Top Navigation Bar on Welcome Screen */}
+      <header className="w-full max-w-2xl flex justify-between items-center z-10 py-1 flex-shrink-0">
+        <div className="flex items-center gap-1.5 text-[11px] sm:text-xs tracking-wider sm:tracking-widest text-[#726d63] dark:text-[#9d978a] font-sans-ui uppercase font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-[#99793d] dark:text-[#d4af37]" />
           <span>Lector Digital Interactivo</span>
         </div>
-        <button
-          id="btn-welcome-theme-toggle"
-          onClick={onToggleTheme}
-          aria-label="Cambiar tema de color"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#ded8cb] dark:border-[#2f353d] bg-[#f0ecdf] dark:bg-[#1a1e24] text-xs font-sans-ui text-[#524e46] dark:text-[#c4bfb3] hover:bg-[#e6e1d3] dark:hover:bg-[#252b33] transition-all cursor-pointer shadow-xs"
-        >
-          {isDark ? (
-            <>
-              <Sun className="w-3.5 h-3.5 text-[#d4af37]" />
-              <span className="hidden sm:inline">Modo Día</span>
-            </>
-          ) : (
-            <>
-              <Moon className="w-3.5 h-3.5 text-[#4a6b82]" />
-              <span className="hidden sm:inline">Modo Noche</span>
-            </>
+
+        <div className="flex items-center gap-1.5">
+          {onOpenSearch && (
+            <button
+              id="btn-welcome-search-quick"
+              onClick={onOpenSearch}
+              aria-label="Buscar en el texto"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#ded8cb] dark:border-[#2f353d] bg-[#f0ecdf] dark:bg-[#1a1e24] text-xs font-sans-ui text-[#524e46] dark:text-[#c4bfb3] hover:bg-[#e6e1d3] dark:hover:bg-[#252b33] transition-all cursor-pointer shadow-xs active:scale-95"
+              title="Buscar en todo el libro"
+            >
+              <Search className="w-3.5 h-3.5 text-[#8c6b2d] dark:text-[#d4af37]" />
+              <span className="hidden xs:inline">Buscar</span>
+            </button>
           )}
-        </button>
+
+          <button
+            id="btn-welcome-theme-toggle"
+            onClick={onToggleTheme}
+            aria-label="Cambiar tema de color"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-[#ded8cb] dark:border-[#2f353d] bg-[#f0ecdf] dark:bg-[#1a1e24] text-xs font-sans-ui text-[#524e46] dark:text-[#c4bfb3] hover:bg-[#e6e1d3] dark:hover:bg-[#252b33] transition-all cursor-pointer shadow-xs active:scale-95"
+          >
+            {isDark ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-[#d4af37]" />
+                <span className="hidden sm:inline">Modo Día</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-[#4a6b82]" />
+                <span className="hidden sm:inline">Modo Noche</span>
+              </>
+            )}
+          </button>
+        </div>
       </header>
 
-      {/* Main Cover Card */}
-      <main className="my-auto w-full max-w-2xl text-center py-8 md:py-12 flex flex-col items-center">
-        {/* Decorative spiritual frame */}
-        <div className="w-full border border-[#ded8cb] dark:border-[#2d323b] p-6 sm:p-10 md:p-14 rounded-2xl bg-[#fbf9f4] dark:bg-[#16191f] shadow-sm relative">
-          <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-[#99793d] dark:border-[#d4af37]" />
-          <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-[#99793d] dark:border-[#d4af37]" />
-          <div className="absolute bottom-3 left-3 w-3 h-3 border-b-2 border-l-2 border-[#99793d] dark:border-[#d4af37]" />
-          <div className="absolute bottom-3 right-3 w-3 h-3 border-b-2 border-r-2 border-[#99793d] dark:border-[#d4af37]" />
+      {/* Main Cover Card - Optimized for mobile viewport & touch ergonomics */}
+      <main className="w-full max-w-xl text-center py-2 sm:py-6 flex flex-col items-center my-auto">
+        {/* Decorative spiritual frame with balanced padding on mobile */}
+        <div className="w-full border border-[#ded8cb] dark:border-[#2d323b] p-3.5 sm:p-7 md:p-9 rounded-2xl bg-[#fbf9f4]/95 dark:bg-[#16191f]/95 shadow-sm relative backdrop-blur-xs">
+          {/* Subtle spiritual corner markers */}
+          <div className="absolute top-2.5 left-2.5 w-2.5 h-2.5 border-t-2 border-l-2 border-[#99793d] dark:border-[#d4af37]" />
+          <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 border-t-2 border-r-2 border-[#99793d] dark:border-[#d4af37]" />
+          <div className="absolute bottom-2.5 left-2.5 w-2.5 h-2.5 border-b-2 border-l-2 border-[#99793d] dark:border-[#d4af37]" />
+          <div className="absolute bottom-2.5 right-2.5 w-2.5 h-2.5 border-b-2 border-r-2 border-[#99793d] dark:border-[#d4af37]" />
 
           {/* Book Header */}
-          <p className="text-xs md:text-sm tracking-[0.25em] font-sans-ui uppercase text-[#888173] dark:text-[#999285] mb-3">
+          <p className="text-[10px] sm:text-xs tracking-[0.2em] font-sans-ui uppercase text-[#888173] dark:text-[#999285] mb-1">
             {BOOK_FOUNDATION}
           </p>
 
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-display font-semibold tracking-wide text-[#1c1a17] dark:text-[#f3f0e8] leading-tight my-4">
+          <h1 className="text-xl sm:text-3xl md:text-4xl font-display font-semibold tracking-wide text-[#1c1a17] dark:text-[#f3f0e8] leading-tight my-1 sm:my-2.5">
             {BOOK_TITLE}
           </h1>
 
-          <div className="w-16 h-px bg-[#c9b58e] dark:bg-[#726442] mx-auto my-4" />
+          <div className="w-12 sm:w-16 h-px bg-[#c9b58e] dark:bg-[#726442] mx-auto my-1.5 sm:my-3" />
 
-          <p className="text-base sm:text-lg font-serif-book italic text-[#5a5449] dark:text-[#b8b3a7] mb-6">
+          <p className="text-xs sm:text-base font-serif-book italic font-semibold text-[#5a5449] dark:text-[#b8b3a7] mb-1">
             {BOOK_SUBTITLE}
           </p>
 
-          <p className="text-xs sm:text-sm font-sans-ui text-[#777063] dark:text-[#8e887b] max-w-md mx-auto mb-8 leading-relaxed">
+          <p className="text-[10px] sm:text-xs font-sans-ui text-[#777063] dark:text-[#8e887b] max-w-sm mx-auto mb-2.5 sm:mb-4 leading-normal">
             {BOOK_TRANSLATION}
           </p>
 
-          {/* Spiritual Axiom Quote */}
-          <div className="border-t border-b border-[#eae4d5] dark:border-[#282d36] py-4 px-3 mb-8 bg-[#f5f1e7]/60 dark:bg-[#1a1e26]/60 rounded-lg">
-            <p className="font-serif-book italic text-sm sm:text-base text-[#3d3830] dark:text-[#ddd8cb] leading-relaxed">
+          {/* Spiritual Axiom Quote - Compact and comfortable */}
+          <div className="border border-[#eae4d5] dark:border-[#282d36] py-2 px-3 mb-3.5 sm:mb-5 bg-[#f5f1e7]/80 dark:bg-[#1a1e26]/80 rounded-xl">
+            <p className="font-serif-book italic text-xs sm:text-sm text-[#3d3830] dark:text-[#ddd8cb] leading-snug">
               «Nada real puede ser amenazado. Nada irreal existe. En esto radica la paz de Dios.»
             </p>
           </div>
 
-          {/* Primary Action Buttons */}
-          <div className="flex flex-col gap-3 w-full max-w-md mx-auto">
+          {/* Primary Action Stack & Touch-friendly Grid on Mobile */}
+          <div className="flex flex-col gap-2 sm:gap-2.5 w-full mx-auto">
+            {/* Primary Action: Continuar lectura (Hero CTA) */}
             {hasProgress && (
               <button
                 id="btn-welcome-continue"
                 onClick={onContinue}
-                className="group w-full flex items-center justify-between px-5 py-3.5 rounded-xl bg-[#2e3e4e] hover:bg-[#253240] dark:bg-[#d4af37] dark:hover:bg-[#c29e2f] text-white dark:text-[#14171c] font-sans-ui font-medium text-sm sm:text-base shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                className="group w-full flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-[#243342] to-[#2e3e4e] hover:from-[#1d2935] hover:to-[#253240] dark:from-[#d4af37] dark:to-[#b89528] text-white dark:text-[#14171c] font-sans-ui shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] text-left"
               >
-                <div className="flex items-center gap-3 text-left">
-                  <BookOpen className="w-5 h-5 flex-shrink-0" />
-                  <div>
-                    <div className="font-semibold">Continuar lectura</div>
-                    <div className="text-xs opacity-85">
-                      Pág. {lastPage} de {TOTAL_PAGES} ({progressPercent}%) • Cap. {lastChapter?.number}: {lastChapter?.title}
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 rounded-lg bg-white/15 dark:bg-black/15 flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="w-4 h-4 text-amber-300 dark:text-[#14171c]" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-xs sm:text-sm leading-tight flex items-center justify-between gap-1">
+                      <span>Continuar lectura</span>
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-white/20 dark:bg-black/20 text-white dark:text-[#14171c] tabular-nums">
+                        {progressPercent}%
+                      </span>
+                    </div>
+                    <div className="text-[11px] sm:text-xs opacity-85 truncate mt-0.5">
+                      Pág. {lastPage} de {TOTAL_PAGES} • Cap. {lastChapter?.number}: {lastChapter?.title}
+                    </div>
+                    {/* Mini progress bar */}
+                    <div className="w-full h-1 bg-white/20 dark:bg-black/20 rounded-full mt-1.5 overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 dark:bg-[#14171c] rounded-full transition-all duration-300"
+                        style={{ width: `${progressPercent}%` }}
+                      />
                     </div>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 flex-shrink-0 transition-transform group-hover:translate-x-1" />
               </button>
             )}
 
-            <button
-              id="btn-welcome-start"
-              onClick={onStartBeginning}
-              className={`w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl border font-sans-ui font-medium text-sm sm:text-base transition-all cursor-pointer active:scale-[0.99] ${
-                hasProgress
-                  ? 'border-[#ded8cb] dark:border-[#2f353d] bg-white dark:bg-[#1a1e24] text-[#3c372f] dark:text-[#dfdbd1] hover:bg-[#f2eee5] dark:hover:bg-[#242a33]'
-                  : 'bg-[#2e3e4e] hover:bg-[#253240] dark:bg-[#d4af37] dark:hover:bg-[#c29e2f] text-white dark:text-[#14171c] shadow-sm hover:shadow-md'
-              }`}
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>{hasProgress ? "Empezar desde el principio (Página 1)" : "Empezar lectura del Texto"}</span>
-            </button>
+            {/* Quick 2-Column Action Grid for Mobile & Desktop */}
+            <div className="grid grid-cols-2 gap-2 w-full">
+              {/* Empezar desde la página 1 */}
+              <button
+                id="btn-welcome-start"
+                onClick={onStartBeginning}
+                className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:py-3 rounded-xl border border-[#ded8cb] dark:border-[#2f353d] bg-white dark:bg-[#1a1e24] text-[#3c372f] dark:text-[#dfdbd1] hover:bg-[#f2eee5] dark:hover:bg-[#242a33] font-sans-ui text-xs sm:text-sm font-semibold transition-all cursor-pointer active:scale-[0.98] shadow-2xs"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-[#8c6b2d] dark:text-[#d4af37] flex-shrink-0" />
+                <span className="truncate">{hasProgress ? "Pág. 1 (Inicio)" : "Empezar Texto"}</span>
+              </button>
 
-            <button
-              id="btn-welcome-index"
-              onClick={onOpenIndex}
-              className="w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-transparent text-[#615a4e] dark:text-[#aba495] hover:text-[#2c2925] dark:hover:text-white hover:bg-[#ede7d9]/60 dark:hover:bg-[#20252e] font-sans-ui text-sm transition-all cursor-pointer"
-            >
-              <Compass className="w-4 h-4" />
-              <span>Ver índice de los 31 capítulos</span>
-            </button>
+              {/* Ver índice de capítulos */}
+              <button
+                id="btn-welcome-index"
+                onClick={onOpenIndex}
+                className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:py-3 rounded-xl border border-[#ded8cb] dark:border-[#2f353d] bg-white dark:bg-[#1a1e24] text-[#3c372f] dark:text-[#dfdbd1] hover:bg-[#f2eee5] dark:hover:bg-[#242a33] font-sans-ui text-xs sm:text-sm font-semibold transition-all cursor-pointer active:scale-[0.98] shadow-2xs"
+              >
+                <Compass className="w-3.5 h-3.5 text-[#8c6b2d] dark:text-[#d4af37] flex-shrink-0" />
+                <span className="truncate">31 Capítulos</span>
+              </button>
+            </div>
 
+            {/* Oraciones del Perdón (UCDM) - High Visibility & Ergonomic Touch Card */}
             {onOpenOraciones && (
-              <div className="pt-2 border-t border-[#ded8cb]/80 dark:border-[#2f353d]/80">
-                <button
-                  id="btn-welcome-oraciones"
-                  onClick={onOpenOraciones}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-[#d4af37]/50 bg-gradient-to-r from-amber-500/15 via-[#d4af37]/10 to-amber-500/15 hover:from-amber-500/25 hover:to-amber-500/25 text-amber-900 dark:text-amber-200 font-sans-ui transition-all cursor-pointer shadow-xs hover:shadow-md group active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-3 text-left">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#d4af37] to-[#8c6b2d] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform flex-shrink-0">
-                      <Sparkles className="w-4 h-4" />
+              <button
+                id="btn-welcome-oraciones"
+                onClick={onOpenOraciones}
+                className="w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-[#d4af37]/60 bg-gradient-to-r from-amber-500/15 via-[#d4af37]/10 to-amber-500/15 hover:from-amber-500/25 hover:to-amber-500/25 text-[#8c6b2d] dark:text-amber-200 font-sans-ui transition-all cursor-pointer shadow-xs hover:shadow-md group active:scale-[0.99] text-left"
+              >
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-[#d4af37] to-[#8c6b2d] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform flex-shrink-0">
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-xs sm:text-sm text-[#8c6b2d] dark:text-[#d4af37] leading-tight">
+                      Oraciones del Perdón (UCDM)
                     </div>
-                    <div>
-                      <div className="font-semibold text-sm text-[#8c6b2d] dark:text-[#d4af37]">
-                        Oraciones del Perdón (UCDM)
-                      </div>
-                      <div className="text-[11px] text-neutral-600 dark:text-neutral-400 font-normal">
-                        25+ oraciones interactivas para cada situación
-                      </div>
+                    <div className="text-[10px] sm:text-[11px] text-neutral-600 dark:text-neutral-400 font-normal truncate mt-0.5">
+                      25+ oraciones interactivas por tema y situación
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8c6b2d] dark:text-[#d4af37] group-hover:translate-x-1 transition-transform flex-shrink-0" />
-                </button>
-              </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-[#8c6b2d] dark:text-[#d4af37] group-hover:translate-x-1 transition-transform flex-shrink-0 ml-1.5" />
+              </button>
             )}
+
+            {/* Quick Tools Row (Buscador, Guardados, PDF) */}
+            <div className="grid grid-cols-3 gap-1.5 pt-1 w-full text-[11px] font-sans-ui">
+              {onOpenSearch ? (
+                <button
+                  onClick={onOpenSearch}
+                  className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[#5a5347] dark:text-[#c4bfb3] transition-colors cursor-pointer"
+                >
+                  <Search className="w-3 h-3 text-[#8c6b2d] dark:text-[#d4af37]" />
+                  <span>Buscador</span>
+                </button>
+              ) : null}
+
+              {onOpenBookmarks ? (
+                <button
+                  onClick={onOpenBookmarks}
+                  className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[#5a5347] dark:text-[#c4bfb3] transition-colors cursor-pointer"
+                >
+                  <BookmarkIcon className="w-3 h-3 text-[#8c6b2d] dark:text-[#d4af37]" />
+                  <span>Guardados</span>
+                </button>
+              ) : null}
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[#5a5347] dark:text-[#c4bfb3] transition-colors cursor-pointer"
+                title="Cargar otro PDF"
+              >
+                <FileUp className="w-3 h-3 text-[#8c6b2d] dark:text-[#d4af37]" />
+                <span>Otro PDF</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Custom PDF Upload / Replacement option */}
-        <div className="mt-5 text-xs text-[#80796c] dark:text-[#888174] flex items-center justify-center gap-2 font-sans-ui">
-          <span>Archivo cargado: <strong className="font-semibold">UCDM_Texto.pdf</strong></span>
-          <span>•</span>
-          <button
-            id="btn-welcome-load-custom"
-            onClick={() => fileInputRef.current?.click()}
-            className="underline hover:text-[#2c2925] dark:hover:text-white transition-colors cursor-pointer"
-            title="Seleccionar otro archivo PDF de tu equipo"
-          >
-            Cargar otro PDF
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/pdf"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-        </div>
+        {/* Hidden PDF file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf"
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </main>
 
-      {/* Footer info */}
-      <footer className="w-full max-w-4xl text-center text-xs text-[#8a8375] dark:text-[#7f786c] font-sans-ui z-10 pt-4 border-t border-[#ded8cb]/60 dark:border-[#252a33]">
-        <p>Lector sin distracciones • Guardado automático en tu navegador • 31 Capítulos • 297 Páginas</p>
+      {/* Footer info - Compact on mobile, generous spacing from edge */}
+      <footer className="w-full max-w-xl text-center text-[10px] sm:text-xs text-[#8a8375] dark:text-[#7f786c] font-sans-ui z-10 pt-2 sm:pt-3 border-t border-[#ded8cb]/60 dark:border-[#252a33] flex-shrink-0">
+        <p>Lectura sin distracciones • Guardado automático en tu dispositivo • 31 Capítulos • 297 Páginas</p>
       </footer>
     </div>
   );
 };
+

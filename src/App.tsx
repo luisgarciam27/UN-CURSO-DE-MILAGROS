@@ -297,6 +297,21 @@ export default function App() {
     }
   }, [displayMode, pdfDoc]);
 
+  const handleCustomPdfLoaded = async (file: File) => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      if (window.pdfjsLib) {
+        const doc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        setPdfDoc(doc);
+        setDisplayMode('facsimile');
+        setView('reader');
+      }
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo cargar el archivo PDF.");
+    }
+  };
+
   // Global Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -472,11 +487,18 @@ export default function App() {
             setIsDrawerOpen(true);
           }}
           onOpenOraciones={() => setIsOracionesModalOpen(true)}
+          onOpenSearch={() => setIsSearchOpen(true)}
+          onOpenBookmarks={() => {
+            setIsOracionesModalOpen(false);
+            setView('reader');
+            setIsDrawerOpen(true);
+          }}
+          onCustomFileLoaded={handleCustomPdfLoaded}
         />
       ) : (
         <div
           id="ucdm-reader-app"
-          className="relative w-screen h-screen overflow-hidden flex bg-[#f5ede0] dark:bg-[#181b22] text-[#3d2f20] dark:text-[#e4e0d6] transition-colors duration-300 select-none"
+          className="fixed inset-0 w-full h-[100dvh] overflow-hidden flex bg-[#f5ede0] dark:bg-[#181b22] text-[#3d2f20] dark:text-[#e4e0d6] transition-colors duration-300"
         >
           {/* Top Header Bar */}
           <ReaderHeader

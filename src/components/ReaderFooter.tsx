@@ -90,7 +90,7 @@ export const ReaderFooter: React.FC<ReaderFooterProps> = ({
   return (
     <footer
       id="reader-floating-dock"
-      className={`fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 ease-out pointer-events-none ${
+      className={`fixed bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] left-1/2 -translate-x-1/2 z-30 transition-all duration-300 ease-out pointer-events-none max-w-[96vw] ${
         visible
           ? 'translate-y-0 opacity-100'
           : 'translate-y-8 opacity-0 pointer-events-none'
@@ -292,7 +292,7 @@ export const ReaderFooter: React.FC<ReaderFooterProps> = ({
           id="btn-footer-fullscreen"
           onClick={onToggleFullscreen}
           aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
-          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 text-neutral-500 transition-colors cursor-pointer"
+          className="w-8 h-8 rounded-full hidden xs:flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 text-neutral-500 transition-colors cursor-pointer"
           title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
         >
           {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
